@@ -105,4 +105,4 @@ This project was completed as the final project for **IST 686: Quantitative Reas
 
 **Prasad Shimpi**
 MS Applied Data Science, Syracuse University
-[LinkedIn](https://www.linkedin.com/in/prasadshimpi/) | [GitHub](https://github.com/prasad11s)
+[LinkedIn](https://www.linkedin.com/in/prasadshimpi/) 
