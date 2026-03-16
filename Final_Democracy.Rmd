@@ -1,0 +1,560 @@
+---
+title: "Democracy_Analysis"
+author: "Prasad Shimpi"
+date: "2025-05-08"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Data Source
+
+```{r}
+# Dataset Source: V-Dem Institute – Varieties of Party Identity and Organization (V–Party) Dataset V2
+# URL: https://www.v-dem.net/vpartyds.html
+```
+
+# Cleaning and loading the data
+
+```{r}
+library(tidyverse)
+
+vparty_df <- read_csv(
+"C:/Users/PRASAD/Desktop/Syracuse/Academic/IST686.M001.QDS/FInal Project/CPD_V-Party_CSV_v2/V-Dem-CPD-Party-V2.csv"
+)
+```
+
+```{r}
+library(janitor)
+vparty_df <- clean_names(vparty_df)
+```
+
+
+```{r}
+# head(vparty_df)
+
+dim(vparty_df)
+```
+
+```{r}
+# Preview the dataset
+# glimpse(vparty_df)
+```
+# Selecting Relavant Countries and Filtering the columns
+
+```{r}
+focus_countries <- c("India", "United States of America", "United Kingdom", 
+                     "Germany", "Australia", "China")
+
+vparty_subset <- vparty_df %>%
+  filter(country_name %in% focus_countries) %>%
+  select(
+    country_name,
+    year,
+    party_name = v2paenname,
+    
+    # Populism indicators
+    anti_pluralism = v2xpa_antiplural,
+    populism = v2xpa_popul,
+    anti_elitism = v2paanteli,
+    people_centrism = v2papeople,
+    
+    # Democracy indicators
+    political_pluralism = v2paplur,
+    respect_opponents = v2paopresp,
+    minority_rights = v2paminor,
+    
+    # Gender equality indicators
+    gender_equality = v2pagender,
+    working_women = v2pawomlab,
+    
+  ) %>%
+  drop_na()
+
+# Preview cleaned dataset
+dim(vparty_subset)
+glimpse(vparty_subset)
+ 
+
+```
+# 1. country_name         - Name of the country associated with the political party observation
+# 2. year                 - Year of the observation
+# 3. party_name           - Full name of the political party
+# 4. anti_pluralism       - Degree to which the party expresses anti-pluralistic rhetoric or attitudes
+# 5. populism             - Overall populism score combining people-centrism, anti-elitism, and anti-pluralism
+# 6. anti_elitism         - Degree to which the party frames elites as corrupt or disconnected
+# 7. people_centrism      - Extent to which the party claims to represent the general will of “the people”
+# 8. political_pluralism  - Support for political pluralism (e.g., tolerance of opposition, checks and balances)
+# 9. respect_opponents    - Respect for political opponents and civil discourse in competition
+#10. minority_rights      - Support for protection and inclusion of ethnic, religious, or social minorities
+#11. gender_equality      - Party's ideological stance on gender equality
+#12. working_women        - Party's view on women working outside the home
+
+
+```{r}
+library(dplyr)
+
+summary_table <- vparty_subset %>%
+  group_by(country_name) %>%
+  summarise(
+    avg_populism = mean(populism, na.rm = TRUE),
+    avg_respect = mean(respect_opponents, na.rm = TRUE),
+    avg_pluralism = mean(political_pluralism, na.rm = TRUE),
+    avg_minority = mean(minority_rights, na.rm = TRUE),
+    avg_gender = mean(gender_equality, na.rm = TRUE),
+    avg_women = mean(working_women, na.rm = TRUE)
+  ) %>%
+  arrange(desc(avg_populism))
+
+summary_table
+
+```
+# The summary table compares key democratic and social indicators across six major countries. India reports the highest average populism score (0.65), whereas Germany and the U.S. have the lowest (0.14 and 0.28). Interestingly, higher populism tends to correspond with lower respect for opponents, as seen in India and the UK. Germany and Australia stand out with high levels of respect for opponents and political pluralism, while China shows negative scores for pluralism and minority rights, despite moderate populism. On gender equality, Germany leads with a strong positive mean, whereas India scores the lowest, suggesting possible gender bias in party ideologies. The U.S. shows a puzzling mix — low populism, moderate respect, but the lowest support for working women, hinting at cultural-policy gaps. These patterns reflect how populism and party ideologies influence democratic values differently across regions.
+
+
+# Scatterplots
+
+```{r}
+# Populism vs Minority Rights
+
+
+ggplot(vparty_subset, aes(x = populism, y = minority_rights, color = country_name)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Populism vs. Minority Rights",
+    x = "Populism Score",
+    y = "Minority Rights Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+# The above scatterplot shows a clear negative relationship between populism and minority rights, especially in India and China. In contrast, Australia and Germany maintain minority protections despite varying populism levels, suggesting stronger institutions. The U.S. shows consistently low minority rights regardless of populism, while the UK remains moderate on both. Overall, rising populism often coincides with weaker minority protections.
+
+
+```{r}
+
+# Populism vs Respect for Opponents
+
+library(ggplot2)
+
+ggplot(vparty_subset, aes(x = populism, y = respect_opponents, color = country_name)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Populism vs. Respect for Political Opponents",
+    x = "Populism Score",
+    y = "Respect for Opponents Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+
+#There is a clear negative correlation between populism and respect for political opponents across most countries. This is strongest in the U.S. and UK, where increased populism sharply coincides with decreased political tolerance. Germany and China also show a downward trend, albeit less steep. India shows a mild upward tilt, which could reflect complex political dynamics. Australia remains the most stable, preserving high levels of respect even under varying populist scores.
+
+
+```{r}
+
+# Gender Equality vs Political Pluralism
+ggplot(vparty_subset, aes(x = gender_equality, y = political_pluralism, color = country_name)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Gender Equality vs. Political Pluralism",
+    x = "Gender Equality Ideology Score",
+    y = "Political Pluralism Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+# Most countries show a positive or flat relationship between gender equality ideology and political pluralism. Germany and Australia maintain high pluralism across all levels of gender scores. The U.S. and UK exhibit lower pluralism at lower gender scores, with slight improvement as gender scores rise. India remains clustered at the lower end for both dimensions. China appears as an outlier, with both variables deeply negative.
+
+
+```{r}
+
+# People-Centrism vs Respect for Opponents
+
+ggplot(vparty_subset, aes(x = people_centrism, y = respect_opponents, color = country_name)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "People-Centrism vs. Respect for Opponents",
+    x = "People-Centric Ideology Score",
+    y = "Respect for Opponents Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+# The chart shows a clear negative trend: as people-centric ideology rises, respect for political opponents declines. This is strongest in India and the UK, where increased populist rhetoric often coincides with adversarial politics. Germany and Australia maintain high respect scores across the board. The U.S. is clustered low on both scales, while China's slope is neutral, possibly due to party centralization. This supports concerns about civic polarization in populist systems.
+
+
+# Boxplots to understand variables by each coutry 
+
+```{r}
+# P opulism by Country
+ggplot(vparty_subset, aes(x = country_name, y = populism, fill = country_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Populism by Country",
+    x = "Country",
+    y = "Populism Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+# India shows the highest and widest spread of populism scores, indicating both frequent and intense populist ideologies. Germany scores the lowest and most consistent, with little populist fluctuation. The U.S. and UK hover around the moderate-low range, with some outliers. Australia and China fall in the mid-range, with China being relatively concentrated. Overall, the chart highlights how populist narratives are more entrenched and varied in countries like India.
+
+
+```{r}
+# Political Pluralism by Country
+
+ggplot(vparty_subset, aes(x = country_name, y = political_pluralism, fill = country_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Political Pluralism by Country",
+    x = "Country",
+    y = "Political Pluralism Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+# Australia, Germany, and the UK show the highest consistency and levels of political pluralism, indicating strong multi-party tolerance. China scores lowest, with entirely negative values, confirming centralized political suppression. India’s distribution is broad, showing variation across parties, from open to restrictive. The U.S. shows mid-range pluralism, but with notable low outliers. Overall, pluralism remains strong in democracies and alarmingly low in authoritarian systems.
+
+```{r}
+# Gender Equality by Country
+
+ggplot(vparty_subset, aes(x = country_name, y = gender_equality, fill = country_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Gender Equality Ideology by Country",
+    x = "Country",
+    y = "Gender Equality Ideology Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+# Germany shows the strongest support for gender equality, with a high median and wide distribution across progressive ideology scores. In contrast, India's scores cluster below zero, indicating low endorsement of gender-equal ideologies. Australia and the UK are more varied but center around neutral. The U.S. shows moderate support, while China's scores are tightly packed around zero, suggesting limited but consistent neutrality. These insights reveal sharp ideological divides in gender inclusion.
+
+
+```{r}
+# Respect for Opponents by Country
+
+ggplot(vparty_subset, aes(x = country_name, y = respect_opponents, fill = country_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Respect for Political Opponents by Country",
+    x = "Country",
+    y = "Respect Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+# Australia, China, and Germany rank highest in political respect, showing tightly clustered values well above zero. India exhibits a broader spread, indicating mixed ideological tolerance. UK and U.S. both show concerning lower medians and several outliers with strongly negative views. This suggests political polarization may be more prominent in these two democracies. The overall trend reinforces that institutional respect varies widely even among democracies.
+
+```{r}
+# Minority Rights by Country
+
+ggplot(vparty_subset, aes(x = country_name, y = minority_rights, fill = country_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Minority Rights Support by Country",
+    x = "Country",
+    y = "Minority Rights Score"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+# Australia shows the strongest and most consistent support for minority rights, followed closely by Germany with more internal variation. India and the UK both have relatively high median scores but also notable negative outliers, reflecting internal political divides. China and the U.S. show troublingly low medians, with the U.S. skewed clearly negative. This highlights how protection for minorities is far from uniform, even across democracies.
+
+
+## Time series visualizations
+
+```{r}
+# Populism Score Over Time by Country
+
+ggplot(vparty_subset, aes(x = year, y = populism, color = country_name)) +
+  geom_line(stat = "smooth", method = "loess", se = FALSE) +
+  labs(
+    title = "Populism Trends Over Time",
+    x = "Year",
+    y = "Populism Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+
+```
+# Plot clearly shows the evolution of populism across countries and reveals major contrasts, such as: 
+
+India's populism has declined after peaking around 2005–2010. 
+Germany remains the least populist across time, but with a slight rise post-2000.
+China saw a sharp decline in the early years.
+United States shows a U-curve trend — dipping and rising back post-2010.
+
+
+```{r}
+# Gender Equality Ideology Over Time by Country
+
+ggplot(vparty_subset, aes(x = year, y = gender_equality, color = country_name)) +
+  geom_line(stat = "smooth", method = "loess", se = FALSE) +
+  labs(
+    title = "Gender Equality Ideology Trends Over Time",
+    x = "Year",
+    y = "Gender Equality Ideology Score",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+
+# This time series plot reveals evolving ideological support for gender equality among political parties from 1970 to 2020. Germany exhibits the most substantial growth, reaching the highest score by 2020. The United Kingdom and the U.S. also show consistent upward trends, while Australia peaks around 2010 before slightly declining. India starts low and shows only modest improvement over time. In contrast, China remains largely flat, indicating minimal ideological change. These trends suggest ideological divergence, with Western democracies leaning progressively toward gender equality, while others lag behind.
+
+
+
+## Research Questions: 
+
+1. How does the level of populism influence a party’s respect for political opponents across different countries?
+
+2. Is there a significant difference in gender equality ideology among political parties across India, the U.S., and Germany?
+
+3. Do countries with higher support for minority rights also exhibit higher political pluralism?
+
+4. Do political parties with stronger anti-elitism views tend to show greater support for people-centric policies, and does this relationship vary across countries?
+
+```{r}
+# Q1. How does the level of populism influence a party’s respect for political opponents across different countries?
+
+# 
+
+model_respect_by_populism_country_interaction <- lm(
+  respect_opponents ~ populism * country_name,
+  data = vparty_subset
+)
+summary(model_respect_by_populism_country_interaction)
+
+```
+# This model shows that higher populism is generally associated with lower respect for political opponents (β = -1.31, p < 0.001). The interaction terms suggest this effect differs by country: in Germany and the U.S., populist parties show significantly sharper declines in respect. Interestingly, in India, populism has a positive association with respect, implying a different political dynamic. The overall model fit is strong (R² = 0.83), indicating that this combination of predictors explains a large portion of the variation. These results highlight context-dependent effects of populism, which community leaders should consider when addressing polarization.
+
+
+```{r}
+
+library(rstanarm)
+
+
+model_respect_opponents_bayes <- stan_glm(
+  respect_opponents ~ populism * country_name,
+  data = vparty_subset,
+  family = gaussian(),
+  prior = normal(0, 1),
+  prior_intercept = normal(0, 1),
+  prior_aux = exponential(1),
+  chains = 4,
+  iter = 4000,
+  seed = 123
+)
+
+summary(model_respect_opponents_bayes)
+
+```
+
+
+# The Bayesian model confirms a negative association between populism and respect for opponents (mean = -1.3, 90% CI: -1.7 to -1.0). This suggests that as parties become more populist, they tend to show less respect for political opponents. The interaction effects vary across countries: in India, populism is positively associated with respect (mean = +1.7), while in the U.S. (−2.8) and Germany (−1.2), populism predicts a stronger decline in respect. All MCMC diagnostics indicate strong convergence and stable estimates (Rhat = 1.0, n_eff > 4000), making this a robust result.
+
+
+```{r}
+#2. Is there a significant difference in gender equality ideology among political parties across India, the U.S., and Germany?
+
+
+df_gender_eq_comparison <- vparty_subset %>%
+  filter(country_name %in% c("India", "United States of America", "Germany"))
+
+model_gender_equality_frequentist <- lm(
+  gender_equality ~ country_name,
+  data = df_gender_eq_comparison
+)
+
+summary(model_gender_equality_frequentist)
+
+
+```
+# Germany (the reference) has a significantly higher average gender equality score. Compared to it, India's parties score lower by 2.50 points, and U.S. parties score lower by 0.66 points, both with p-values < 0.01. The model explains ~42% of the variance (R² = 0.42). This suggests that Germany consistently leads on gender equality ideology, with India notably lagging. The differences are statistically significant.
+
+
+```{r}
+
+model_gender_equality_bayes <- stan_glm(
+  gender_equality ~ country_name,
+  data = df_gender_eq_comparison,
+  family = gaussian(),
+  prior = normal(0, 1),
+  prior_intercept = normal(0, 1),
+  prior_aux = exponential(1),
+  chains = 4,
+  iter = 4000,
+  seed = 123
+)
+
+summary(model_gender_equality_bayes)
+
+```
+
+# The model reveals strong evidence of country-based variation in gender equality ideology. Compared to Germany (baseline), India shows a large negative shift in gender equality support (mean = –2.4, 90% CI [–2.7, –2.1]). The U.S. also shows a moderate negative difference (mean = –0.6), suggesting lower support relative to Germany. All estimates converge well (Rhat = 1.0, n_eff > 6900). The mean_PPD aligns with a slightly lower average ideology level across samples. Together, this suggests Germany maintains the strongest party-level commitment to gender equality among the three.
+
+
+```{r}
+
+# 3. Do countries with higher support for minority rights also exhibit higher political pluralism?
+
+model_minority_pluralism_lm <- lm(
+  political_pluralism ~ minority_rights * country_name,
+  data = vparty_subset
+)
+
+
+summary(model_minority_pluralism_lm)
+
+```
+# This model evaluates whether minority rights support predicts political pluralism across countries. The overall fit is excellent (R² = 0.90), showing that 90% of the variance in political pluralism is explained. The main effect of minority rights is not statistically significant overall, but it interacts significantly in China (p = 0.042), suggesting stronger linkage there. India and the U.S. show weaker or marginal interaction effects. These results suggest that the strength of the minority-pluralism relationship is highly context-dependent.
+
+```{r}
+
+model_minority_pluralism_bayes <- stan_glm(
+  political_pluralism ~ minority_rights * country_name,
+  data = vparty_subset,
+  family = gaussian(),
+  prior = normal(0, 2.5),
+  prior_intercept = normal(0, 5),
+  chains = 4, iter = 4000, seed = 123
+)
+
+summary(model_minority_pluralism_bayes)
+```
+
+# The Bayesian analysis reveals that political parties with stronger support for minority rights tend to show higher political pluralism, though the strength of this relationship differs by country. On average, the effect of minority rights on pluralism is modestly positive, but in China, the association is significantly stronger, suggesting a unique political dynamic. In contrast, Germany, India, and other countries exhibit neutral or weak interactions. All model parameters converged well, indicating high reliability. These results reinforce that while support for minority rights aligns with democratic values, its impact on pluralism is shaped by national context.
+
+
+
+```{r}
+# 4. Do political parties with stronger anti-elitism views tend to show greater support for people-centric policies, and does this relationship vary across countries?
+
+model_4_antiElitism_peopleCentrism <- lm(
+  people_centrism ~ anti_elitism * country_name,
+  data = vparty_subset
+)
+
+summary(model_4_antiElitism_peopleCentrism)
+```
+# This model investigates how anti-elitist ideology influences support for people-centric views across different countries. The baseline (Intercept) is marginally significant, and anti-elitism is a strong positive predictor of people-centrism overall (p < 0.001). Significant interaction effects with Germany, India, and the UK suggest that the relationship between anti-elitism and people-centrism varies by context. For example, in Germany, the effect is weaker (negative interaction), whereas in India and the UK, it strengthens the association. The model explains over 75% of the variance (R² = 0.76), indicating strong explanatory power.
+
+```{r}
+
+model4_bayes_peoplecentrism <- stan_glm(
+  people_centrism ~ anti_elitism * country_name,
+  data = vparty_subset,
+  family = gaussian(),
+  chains = 4,
+  iter = 4000,
+  seed = 321,
+  refresh = 500
+)
+
+summary(model4_bayes_peoplecentrism)
+
+```
+
+# This Bayesian regression model evaluates how anti-elitism influences people-centrism in political parties and how this relationship varies across countries. The main effect of anti-elitism is positive (mean = 0.4), suggesting that globally, as parties emphasize anti-elitist narratives, they tend to appeal more to the people. However, the effect differs notably by country. In Germany, the interaction term is negative (-0.3), indicating that anti-elitism is less predictive of people-centrism there. In contrast, India, the UK, and China exhibit positive interaction effects, with the UK and India showing the clearest boosts. All parameters show strong convergence (Rhat = 1.0). These findings highlight how the populist narrative structure varies by national context, despite similar ideological traits.
+
+
+## Final Summary 
+
+Across all models, our analyses reveal that political party ideologies vary significantly across countries in how they relate to key democratic values. Populist parties tend to show less respect for opponents, especially in countries like the U.S. and Germany, while India stands out with a unique pattern. Gender equality is significantly lower in Indian political parties compared to the U.S. and Germany. Minority rights and political pluralism are positively linked, but again, this relationship is stronger in some countries than others. Anti-elitism is a clear driver of people-centered narratives, particularly in India, the UK, and China. These findings emphasize the importance of cultural and national context when interpreting political behavior and messaging, especially when engaging young and diverse citizens in democratic education.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

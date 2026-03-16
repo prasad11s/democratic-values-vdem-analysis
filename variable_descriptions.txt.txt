@@ -1,0 +1,13 @@
+1. `anti_pluralism` - Measures opposition to democratic pluralism. High values = party rejects opposition                       legitimacy, media freedom, or civil society. 
+
+2. `populism`- Captures “people vs. elite” narratives. High values = party blames elites,                                oversimplifies issues, promotes itself as sole voice of people. 
+
+3. `anti_elitism` - Component of populism. High values = distrust of elites, blame them for national         issues. 
+
+4. `people_centrism`- Component of populism. High values = party believes only it represents the true                          will of the people.
+
+5. `political_pluralism` - Measures support for political competition and multiple voices. High values =                             party respects democratic norms. 
+
+6. `respect_opponents` - Captures whether a party treats rivals as legitimate or demonizes them.                         
+7.  `minority_rights` -Reflects commitment to protecting ethnic/religious/linguistic minorities.                        
+8.  `gender_equality` - Reflects support for gender equality in rights and representation.      
