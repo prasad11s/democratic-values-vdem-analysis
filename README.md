@@ -23,13 +23,13 @@ Using the V-Dem V-Party dataset covering 1970 to 2020, the study applies both fr
 ## Visualizations
 
 ### Populism vs. Respect for Political Opponents
-![Populism vs Respect](figures/populism_vs_respect_opponents.png)
+![Populism vs Respect](figures/opulism%20vs.%20Respect%20for%20Political%20Opponents.png)
 
 ### Gender Equality Ideology by Country
-![Gender Equality Boxplot](figures/boxplot_gender_equality_by_country.png)
+![Gender Equality Boxplot](figures/Distribution%20of%20Gender%20Equality%20Ideology%20by%20Country.png)
 
 ### Populism Trends Over Time (1970 to 2020)
-![Populism Trends](figures/populism_trends_over_time.png)
+![Populism Trends](figures/Populism%20Trends%20Over%20Time.png)
 
 ## Visualizations
 
@@ -75,17 +75,17 @@ All Bayesian models achieved strong convergence (Rhat = 1.0) with effective samp
 ├── cleaned_vparty_model_data.xlsx  # Cleaned dataset (305 observations, 12 variables)
 ├── variable_descriptions.txt       # Descriptions of all variables used
 ├── figures/                        # All visualizations generated from the analysis
-│   ├── populism_vs_respect_opponents.png
-│   ├── populism_vs_minority_rights.png
-│   ├── gender_equality_vs_political_pluralism.png
-│   ├── people_centrism_vs_respect_opponents.png
-│   ├── boxplot_populism_by_country.png
-│   ├── boxplot_political_pluralism_by_country.png
-│   ├── boxplot_gender_equality_by_country.png
-│   ├── boxplot_respect_opponents_by_country.png
-│   ├── boxplot_minority_rights_by_country.png
-│   ├── populism_trends_over_time.png
-│   └── gender_equality_trends_over_time.png
+│   ├── Distribution of Gender Equality Ideology by Country.png
+│   ├── Distribution of Minority Rights Support by Country.png
+│   ├── Distribution of Political Pluralism by Country.png
+│   ├── Distribution of Populism by Country.png
+│   ├── Distribution of Respect for Political Opponents by Country.png
+│   ├── Gender Equality Ideology Trends Over Time.png
+│   ├── Gender Equality vs. Political Pluralism.png
+│   ├── People-Centrism vs. Respect for Opponents.png
+│   ├── Populism Trends Over Time.png
+│   ├── opulism vs. Respect for Political Opponents.png
+│   └── populism_vs_minority_rights.png
 └── README.md
 ```
 
